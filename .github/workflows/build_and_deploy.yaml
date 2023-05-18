@@ -14,4 +14,36 @@ jobs:
     steps:
       - name: Build service
         run: |
-          echo "Building service ${{inputs.service}}"
+          echo "Building service ${{ inputs.service }}"
+
+  deploy-services-dev:
+    name: Deploy service ${{ inputs.service }} to dev
+    needs:
+      - build-service
+    strategy:
+      fail-fast: false
+      matrix:
+        region: ["eu", "india"]
+    uses: ./.github/workflows/deploy.yaml
+    with:
+      region: ${{ matrix.region }}
+      environment: "dev"
+      service: ${{ inputs.service }}
+    secrets: inherit
+
+  deploy-services-prod:
+    name: Deploy service ${{ inputs.service }} to prod
+    needs:
+      - build-service
+      - deploy-services-dev
+    strategy:
+      fail-fast: false
+      matrix:
+        region: ["eu", "india"]
+    uses: ./.github/workflows/deploy.yaml
+    with:
+      region: ${{ matrix.region }}
+      environment: "prod"
+      service: ${{ inputs.service }}
+    secrets: inherit
+

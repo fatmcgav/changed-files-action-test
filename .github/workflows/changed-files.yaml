@@ -32,50 +32,26 @@ jobs:
     outputs:
       changed_services: ${{ steps.list-all.outputs.changed }}
 
-
-  build-services:
-    name: Build and deploy changed services
+  build_deploy_svc-a:
+    name: Build and deploy svc-a
     needs: detect-changed-services
-    strategy:
-      fail-fast: false
-      matrix:
-        changed_services: ${{ fromJSON(needs.detect-changed-services.outputs.changed_services) }}
+    if: ${{ contains(fromJSON(needs.detect-changed-services.outputs.changed_services), 'svc-a') }}
     uses: ./.github/workflows/build_and_deploy.yaml
     with:
-      service: ${{ matrix.changed_services }}
+      service: svc-a
 
-  deploy-services-dev:
-    name: Deploy services to dev
-    needs: 
-      - detect-changed-services
-      - build-services
-    strategy:
-      fail-fast: false
-      matrix:
-        changed_services: ${{ fromJSON(needs.detect-changed-services.outputs.changed_services) }}
-        region: ["eu", "india"]
-    uses: ./.github/workflows/deploy.yaml
+  build_deploy_svc-b:
+    name: Build and deploy svc-b
+    needs: detect-changed-services
+    if: ${{ contains(fromJSON(needs.detect-changed-services.outputs.changed_services), 'svc-b') }}
+    uses: ./.github/workflows/build_and_deploy.yaml
     with:
-      region: ${{ matrix.region }}
-      environment: "dev"
-      service: ${{ inputs.service }}
-    secrets: inherit
+      service: svc-b
 
-  deploy-services-prod:
-    name: Deploy services to prod
-    needs: 
-      - detect-changed-services
-      - build-services
-      - deploy-services-dev
-    strategy:
-      fail-fast: false
-      matrix:
-        changed_services: ${{ fromJSON(needs.detect-changed-services.outputs.changed_services) }}
-        region: ["eu", "india"]
-    uses: ./.github/workflows/deploy.yaml
+  build_deploy_svc-c:
+    name: Build and deploy svc-c
+    needs: detect-changed-services
+    if: ${{ contains(fromJSON(needs.detect-changed-services.outputs.changed_services), 'svc-c') }}
+    uses: ./.github/workflows/build_and_deploy.yaml
     with:
-      region: ${{ matrix.region }}
-      environment: "prod"
-      service: ${{ inputs.service }}
-    secrets: inherit
-
+      service: svc-c
