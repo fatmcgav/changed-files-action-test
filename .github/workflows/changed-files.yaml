@@ -1,9 +1,7 @@
 name: Telemetry Data Pipeline Release
 
 on:
-  push:
-    branches:
-      - **
+  push: ~
 
 jobs:
   build:
