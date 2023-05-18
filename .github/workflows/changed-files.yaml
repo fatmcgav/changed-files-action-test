@@ -27,13 +27,16 @@ jobs:
           done
 
       - name: trigger svc-a publish
-        if: contains(steps.changed-files.outputs.all_changed_files, "svc-a")
-        run: echo "Svc-a was changed"
+        if: contains(steps.changed-files.outputs.all_changed_files, 'svc-a')
+        run: |
+          echo "Svc-a was changed"
 
       - name: trigger svc-b publish
-        if: contains(steps.changed-files.outputs.all_changed_files, "svc-b")
-        run: echo "Svc-b was changed"
+        if: contains(steps.changed-files.outputs.all_changed_files, 'svc-b')
+        run: |
+          echo "Svc-b was changed"
 
       - name: trigger svc-c publish
-        if: contains(steps.changed-files.outputs.all_changed_files, "svc-c")
-        run: echo "Svc-c was changed"
+        if: contains(steps.changed-files.outputs.all_changed_files, 'svc-c')
+        run: |
+          echo "Svc-c was changed"
