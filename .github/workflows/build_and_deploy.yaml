@@ -1,4 +1,4 @@
-name: Build and Deploy service
+name: Build service
 
 on:
   workflow_call:
@@ -8,25 +8,10 @@ on:
         type: string
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build-service:
     name: Build service
+    runs-on: ubuntu-latest
     steps:
       - name: Build service
         run: |
           echo "Building service ${{inputs.service}}"
-
-  deploy:
-    name: Deploy service
-    needs: build
-    strategy:
-      fail-fast: false
-      matrix:
-        region: ["eu", "india"]
-        environment: ["dev", "prod"]
-    uses: ./.github/workflows/deploy.yaml
-    with:
-      region: ${{ matrix.region }}
-      environment: ${{ matrix.environment }}
-      service: ${{ inputs.service }}
-    secrets: inherit

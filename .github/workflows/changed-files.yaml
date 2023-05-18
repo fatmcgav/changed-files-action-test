@@ -44,3 +44,33 @@ jobs:
     with:
       service: ${{ matrix.changed_services }}
 
+  deploy-services-dev:
+    name: Deploy services to dev
+    needs: build-services
+    strategy:
+      fail-fast: false
+      matrix:
+        changed_services: ${{ fromJSON(needs.detect-changed-services.outputs.changed_services) }}
+        region: ["eu", "india"]
+    uses: ./.github/workflows/deploy.yaml
+    with:
+      region: ${{ matrix.region }}
+      environment: "dev"
+      service: ${{ inputs.service }}
+    secrets: inherit
+
+  deploy-services-prod:
+    name: Deploy services to prod
+    needs: build-services
+    strategy:
+      fail-fast: false
+      matrix:
+        changed_services: ${{ fromJSON(needs.detect-changed-services.outputs.changed_services) }}
+        region: ["eu", "india"]
+    uses: ./.github/workflows/deploy.yaml
+    with:
+      region: ${{ matrix.region }}
+      environment: "prod"
+      service: ${{ inputs.service }}
+    secrets: inherit
+
