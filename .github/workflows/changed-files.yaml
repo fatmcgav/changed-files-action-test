@@ -19,14 +19,16 @@ jobs:
         with:
           dir_names: "true"
           dir_names_max_depth: 1
+          files: |
+            !.github/**
           json: true
 
       - name: List all changed files
         run: |
-            echo "${{ steps.changed-files.outputs.all_changed_files}}"
+            echo "${{ steps.changed-files.outputs.all_changed_files }}"
 
     outputs:
-      changed_services: ${{ toJSON(steps.changed-files.outputs.all_changed_files) }}
+      changed_services: ${{ steps.changed-files.outputs.all_changed_files}}
 
 
   build-services:
@@ -35,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        changed_services: ${{ fromJSON(needs.changed-files.outputs.changed_services) }}
+        changed_services: ${{ needs.changed-files.outputs.changed_services }}
     uses: ./.github/workflows/build_and_deploy.yaml
     with:
       service: ${{ matrix.changed_services }}
