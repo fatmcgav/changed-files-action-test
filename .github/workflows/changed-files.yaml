@@ -4,7 +4,7 @@ on:
   push: ~
 
 jobs:
-  build:
+  detect-changed-services:
     runs-on: ubuntu-latest
     name: Test changed-files
     steps:
@@ -17,26 +17,65 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v35
         with:
-          dir_names: "true"
+          dir_names: true
+          dir_names_exclude_root: true
           dir_names_max_depth: 1
+          files_ignore: |
+            .github/*
+          json: true
 
       - name: List all changed files
+        id: list-all
         run: |
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            echo "$file was changed"
-          done
+            echo "changed=${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_OUTPUT
 
-      - name: trigger svc-a publish
-        if: contains(steps.changed-files.outputs.all_changed_files, 'svc-a')
-        run: |
-          echo "Svc-a was changed"
+    outputs:
+      changed_services: ${{ steps.list-all.outputs.changed }}
 
-      - name: trigger svc-b publish
-        if: contains(steps.changed-files.outputs.all_changed_files, 'svc-b')
-        run: |
-          echo "Svc-b was changed"
 
-      - name: trigger svc-c publish
-        if: contains(steps.changed-files.outputs.all_changed_files, 'svc-c')
-        run: |
-          echo "Svc-c was changed"
+  build-services:
+    name: Build and deploy changed services
+    needs: detect-changed-services
+    strategy:
+      fail-fast: false
+      matrix:
+        changed_services: ${{ fromJSON(needs.detect-changed-services.outputs.changed_services) }}
+    uses: ./.github/workflows/build_and_deploy.yaml
+    with:
+      service: ${{ matrix.changed_services }}
+
+  deploy-services-dev:
+    name: Deploy services to dev
+    needs: 
+      - detect-changed-services
+      - build-services
+    strategy:
+      fail-fast: false
+      matrix:
+        changed_services: ${{ fromJSON(needs.detect-changed-services.outputs.changed_services) }}
+        region: ["eu", "india"]
+    uses: ./.github/workflows/deploy.yaml
+    with:
+      region: ${{ matrix.region }}
+      environment: "dev"
+      service: ${{ inputs.service }}
+    secrets: inherit
+
+  deploy-services-prod:
+    name: Deploy services to prod
+    needs: 
+      - detect-changed-services
+      - build-services
+      - deploy-services-dev
+    strategy:
+      fail-fast: false
+      matrix:
+        changed_services: ${{ fromJSON(needs.detect-changed-services.outputs.changed_services) }}
+        region: ["eu", "india"]
+    uses: ./.github/workflows/deploy.yaml
+    with:
+      region: ${{ matrix.region }}
+      environment: "prod"
+      service: ${{ inputs.service }}
+    secrets: inherit
+

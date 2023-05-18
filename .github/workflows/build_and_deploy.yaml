@@ -1,0 +1,17 @@
+name: Build service
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+
+jobs:
+  build-service:
+    name: Build service
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build service
+        run: |
+          echo "Building service ${{inputs.service}}"

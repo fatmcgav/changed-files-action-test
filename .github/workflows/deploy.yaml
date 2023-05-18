@@ -1,0 +1,23 @@
+name: Deploy service
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      region:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: Deploy service ${{ inputs.service }} to ${{ inputs.environment }} in ${{ inputs.region }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        run: |
+          echo "Deploying service ${{ inputs.service }} to ${{ inputs.environment }} in ${{ inputs.region }}"
